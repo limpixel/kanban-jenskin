@@ -2,9 +2,10 @@ pipeline {
     agent any
 
     environment {
-        NODEJS_HOME = tool name: 'NodeJS', type: 'NodeJSInstallation'
+        NODEJS_HOME = tool name: 'NodeJS', type: 'NodeJSInstallation' // Nama harus sesuai dengan konfigurasi di Jenkins
         PATH = "${NODEJS_HOME}/bin:${env.PATH}"
     }
+
 
     stages {
         stage('Checkout Code') {
