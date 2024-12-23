@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trello-like Todo List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Trello-like Todo List</h1>
+
+        <div id="board" class="flex overflow-x-auto space-x-4 pb-6"></div>
+
+        <form id="add-list-form" class="bg-white shadow-md rounded-lg p-4 mx-auto mt-6 max-w-sm">
+            <input type="text" id="new-list-title" 
+                   class="w-full p-2 border border-gray-300 rounded-md mb-2 focus:ring focus:ring-green-300" 
+                   placeholder="Enter list title" required>
+            <button type="submit" 
+                    class="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 transition">Add List</button>
+        </form>
+    </div>
+
+    <script>
+        const board = document.getElementById('board');
+        const addListForm = document.getElementById('add-list-form');
+        let lists = [];
+
+        function createList(title) {
+            const list = {
+                id: Date.now().toString(),
+                title: title,
+                todos: []
+            };
+            lists.push(list);
+            renderBoard();
+        }
+
+        function addTodo(listId, content) {
+            const list = lists.find(l => l.id === listId);
+            if (list) {
+                list.todos.push({
+                    id: Date.now().toString(),
+                    content: content
+                });
+                renderBoard();
+            }
+        }
+
+        function deleteList(listId) {
+            lists = lists.filter(list => list.id !== listId);
+            renderBoard();
+        }
+
+        function deleteTodo(listId, todoId) {
+            const list = lists.find(l => l.id === listId);
+            if (list) {
+                list.todos = list.todos.filter(todo => todo.id !== todoId);
+                renderBoard();
+            }
+        }
+
+        function openEditor(todoId, listId) {
+            const list = lists.find(l => l.id === listId);
+            const todo = list.todos.find(t => t.id === todoId);
+            const newContent = prompt('Edit Todo', todo.content);
+            if (newContent !== null) {
+                todo.content = newContent;
+                renderBoard();
+            }
+        }
+
+        function renderBoard() {
+            board.innerHTML = '';
+            lists.forEach(list => {
+                const listElement = document.createElement('div');
+                listElement.className = 'bg-gray-200 rounded-lg p-4 w-64 flex-shrink-0';
+                listElement.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="text-lg font-semibold text-gray-700">${list.title}</h2>
+                        <button onclick="deleteList('${list.id}')" 
+                                class="text-red-500 hover:text-red-700">&times;</button>
+                    </div>
+                    <div class="todos space-y-2"></div>
+                    <form class="add-form mt-4">
+                        <input type="text" placeholder="Enter todo content" 
+                               class="w-full p-2 border border-gray-300 rounded-md mb-2 focus:ring focus:ring-blue-300" 
+                               required>
+                        <button type="submit" 
+                                class="w-full bg-blue-500 text-white py-1 rounded-md hover:bg-blue-600 transition">Add Todo</button>
+                    </form>
+                `;
+
+                const todosContainer = listElement.querySelector('.todos');
+                list.todos.forEach(todo => {
+                    const todoElement = document.createElement('div');
+                    todoElement.className = 'bg-white shadow-md rounded-md p-2 flex justify-between items-center';
+                    todoElement.innerHTML = `
+                        <span>${todo.content}</span>
+                        <div class="flex space-x-2">
+                            <button onclick="openEditor('${todo.id}', '${list.id}')" 
+                                    class="text-blue-500 hover:text-blue-700">✎</button>
+                            <button onclick="deleteTodo('${list.id}', '${todo.id}')" 
+                                    class="text-red-500 hover:text-red-700">&times;</button>
+                        </div>
+                    `;
+                    todosContainer.appendChild(todoElement);
+                });
+
+                const addTodoForm = listElement.querySelector('form');
+                addTodoForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const input = addTodoForm.querySelector('input');
+                    addTodo(list.id, input.value);
+                    input.value = '';
+                });
+
+                board.appendChild(listElement);
+            });
+        }
+
+        addListForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('new-list-title');
+            createList(input.value);
+            input.value = '';
+        });
+
+        // Initial render
+        renderBoard();
+    </script>
+</body>
+</html>
