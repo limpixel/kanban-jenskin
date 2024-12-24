@@ -8,17 +8,18 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t myproject .'
+                sh 'docker build -t jenkins .'
             }
         }
         stage('Run Tests') {
             steps {
-                sh 'docker run myproject npm test'
+                sh 'docker run jenkins npm test'
             }
         }
         stage('Deploy') {
             steps {
-                sh 'docker run -d -p 8080:8080 myproject'
+                sh 'docker run -d -p 8080:8080 -p 50000:50000 jenkins/jenkins:lts-jdk17
+'
             }
         }
     }
