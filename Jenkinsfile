@@ -1,63 +1,25 @@
 pipeline {
     agent any
-
-    environment {
-        NODEJS_HOME = tool name: 'NodeJS', type: 'NodeJSInstallation' // Nama harus sesuai dengan konfigurasi di Jenkins
-        PATH = "${NODEJS_HOME}/bin:${env.PATH}"
-    }
-
-
     stages {
-        stage('Checkout Code') {
+        stage('Clone Repository') {
             steps {
-                // Clone repository
-                git branch: 'main', url: 'https://github.com/limpixel/kanban-jenskin.git'
+                sh 'git clone https://github.com/limpixel/kanban-jenskin.git'
             }
         }
-
-        stage('Install Dependencies') {
+        stage('Build Docker Image') {
             steps {
-                // Install npm dependencies
-                sh 'npm install'
+                sh 'docker build -t myproject .'
             }
         }
-
-        stage('Build') {
+        stage('Run Tests') {
             steps {
-                // Build the project
-                sh 'npm run build'
+                sh 'docker run myproject npm test'
             }
         }
-
-        stage('Lint') {
-            steps {
-                // Run linting checks
-                sh 'npm run lint'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                // Run tests
-                sh 'npm test'
-            }
-        }
-
         stage('Deploy') {
             steps {
-                // Deploy application (e.g., copying files to a server)
-                // Modify the deploy command as per your environment
-                sh 'scp -r dist/* user@your-server:/var/www/your-project'
+                sh 'docker run -d -p 8080:8080 myproject'
             }
-        }
-    }
-
-    post {
-        success {
-            echo 'Pipeline executed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed. Check the logs for details.'
         }
     }
 }
