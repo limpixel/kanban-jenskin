@@ -1,25 +1,36 @@
 pipeline {
     agent any
+
+    environment {
+        IMAGE_NAME = "html-supersportapp:latest"
+        CONTAINER_NAME = "html-supersportapp-container"
+        GIT_REPO = "https://github.com/limpixel/kanban-jenskin.git"
+    }
+
     stages {
         stage('Clone Repository') {
             steps {
-                sh 'git clone https://github.com/limpixel/kanban-jenskin.git'
+                // Clone repository dari GitHub
+                git branch: 'main', url: "${GIT_REPO}"
             }
         }
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t jenkins .'
+                script {
+                    sh "docker build -t ${IMAGE_NAME} ."
+                }
             }
         }
-        stage('Run Tests') {
+        stage('Deploy to Docker') {
             steps {
-                sh 'docker run jenkins npm test'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                sh 'docker run -d -p 8080:8080 -p 50000:50000 jenkins/jenkins:lts-jdk17
-'
+                script {
+                    // Stop dan hapus container lama, lalu jalankan yang baru
+                    sh """
+                    docker stop ${CONTAINER_NAME} || true
+                    docker rm ${CONTAINER_NAME} || true
+                    docker run -d --name ${CONTAINER_NAME} -p 9898:80 ${IMAGE_NAME}
+                    """
+                }
             }
         }
     }
