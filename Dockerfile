@@ -5,7 +5,7 @@ FROM nginx:latest
 COPY . /usr/share/nginx/html
 
 # Expose port 80 agar dapat diakses
-EXPOSE 80
+EXPOSE 8080
 
 # Jalankan Nginx dalam mode foreground
 CMD ["nginx", "-g", "daemon off;"]

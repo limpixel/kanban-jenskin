@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "html-supersportapp:latest"
-        CONTAINER_NAME = "html-supersportapp-container"
+        IMAGE_NAME = "jenkins/jenkins:latest"
+        CONTAINER_NAME = "jenkins"
         GIT_REPO = "https://github.com/limpixel/kanban-jenskin.git"
     }
 
@@ -28,7 +28,7 @@ pipeline {
                     sh """
                     docker stop ${CONTAINER_NAME} || true
                     docker rm ${CONTAINER_NAME} || true
-                    docker run -d --name ${CONTAINER_NAME} -p 9898:80 ${IMAGE_NAME}
+                    docker run -d --name ${CONTAINER_NAME} -p 8080:8080 ${IMAGE_NAME}
                     """
                 }
             }
